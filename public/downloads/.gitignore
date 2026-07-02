@@ -1,0 +1,7 @@
+# Installer binaries are published to GitHub Releases by CI, not committed here.
+*.exe
+*.dmg
+*.AppImage
+*.deb
+*.blockmap
+*.zip

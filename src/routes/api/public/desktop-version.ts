@@ -15,10 +15,11 @@ export const Route = createFileRoute("/api/public/desktop-version")({
             latest: DESKTOP_VERSION,
             min: MIN_DESKTOP_VERSION,
             install_url: `${origin}/install`,
+            // Absolute GitHub Release asset URLs (see src/lib/desktop-version.ts).
             downloads: {
-              windows: `${origin}${DESKTOP_DOWNLOADS.windows}`,
-              mac: `${origin}${DESKTOP_DOWNLOADS.mac}`,
-              linux: `${origin}${DESKTOP_DOWNLOADS.linux}`,
+              windows: DESKTOP_DOWNLOADS.windows,
+              mac: DESKTOP_DOWNLOADS.mac,
+              linux: DESKTOP_DOWNLOADS.linux,
             },
           },
           {

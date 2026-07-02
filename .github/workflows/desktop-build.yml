@@ -1,12 +1,18 @@
 name: Build ClockWork Desktop
 
-# Builds all three installers on their native OS runners. macOS .dmg can only be
-# produced on a macOS runner (Apple tooling), which is why this matrix exists.
+# Builds all three installers on their native OS runners (macOS .dmg can only be
+# produced on a macOS runner), then publishes them to a GitHub Release so the
+# web app can link to stable download URLs.
+#
+# Trigger: push a tag like `desktop-v1.0.0`, or run manually (Actions -> Run).
 on:
   workflow_dispatch: {}
   push:
     tags:
       - "desktop-v*"
+
+permissions:
+  contents: write # needed to create/update the Release
 
 jobs:
   build:
@@ -32,8 +38,10 @@ jobs:
         run: npm run build
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # We don't ship Apple/Windows code-signing certs — don't try to sign.
+          CSC_IDENTITY_AUTO_DISCOVERY: false
 
-      - name: Upload installers
+      - name: Upload installers (workflow artifacts)
         uses: actions/upload-artifact@v4
         with:
           name: clockwork-${{ matrix.os }}
@@ -43,3 +51,22 @@ jobs:
             desktop/dist/*.AppImage
             desktop/dist/*.deb
           if-no-files-found: ignore
+
+  release:
+    # Publish a single Release with every OS's installer, only for tag pushes.
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ClockWork Desktop ${{ github.ref_name }}
+          files: artifacts/**/*
+          fail_on_unmatched_files: false
