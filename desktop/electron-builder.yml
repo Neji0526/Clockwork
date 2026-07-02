@@ -54,4 +54,5 @@ linux:
   category: Utility
   icon: build/icon.png
   artifactName: ClockWork-${version}.${ext}
-  maintainer: ClockWork
+  # electron-builder's .deb target requires a maintainer WITH an email.
+  maintainer: ClockWork <support@clockwork.app>
