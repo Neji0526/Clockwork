@@ -1,0 +1,10 @@
+project_id = "johibfayobgerhzjbisu"
+
+[functions.track-ingest]
+verify_jwt = true
+
+[functions.admin-invite]
+verify_jwt = true
+
+[functions.agent-ingest]
+verify_jwt = false

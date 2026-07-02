@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public._test_bridge_scenarios();

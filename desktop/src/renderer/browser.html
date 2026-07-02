@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>ClockWork Browser</title>
+    <style>
+      :root { --bg:#0b0d12; --bar:#161a23; --line:#262c3a; --txt:#eef1f6; --mut:#9aa3b6; --gold:#d4a84a; }
+      * { box-sizing: border-box; }
+      html, body { margin:0; height:100%; background:var(--bg); color:var(--txt); font:13px -apple-system,system-ui,"Segoe UI",sans-serif; }
+      #app { display:flex; flex-direction:column; height:100vh; }
+      .bar { display:flex; align-items:center; gap:8px; padding:8px 10px; background:var(--bar); border-bottom:1px solid var(--line); }
+      .nav button { background:transparent; border:1px solid var(--line); color:var(--txt); width:32px; height:32px; border-radius:8px; cursor:pointer; font-size:15px; }
+      .nav button:hover { border-color:var(--gold); }
+      #url { flex:1; height:32px; padding:0 12px; border-radius:8px; border:1px solid var(--line); background:#0f131c; color:var(--txt); font-size:13px; outline:none; }
+      #url:focus { border-color:var(--gold); }
+      .rec-note { font-size:11px; color:var(--mut); white-space:nowrap; }
+      .rec-note b { color:var(--gold); }
+      webview { flex:1; width:100%; border:0; background:#fff; }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="bar">
+        <div class="nav" style="display:flex; gap:6px;">
+          <button id="back" title="Back">‹</button>
+          <button id="fwd" title="Forward">›</button>
+          <button id="reload" title="Reload">⟳</button>
+        </div>
+        <input id="url" type="text" placeholder="Search or type a URL" spellcheck="false" />
+        <span class="rec-note">Browse here to record <b>click-trail SOPs</b></span>
+      </div>
+      <!-- The <webview> is created in browser.js so its preload path is known first. -->
+      <div id="host" style="flex:1; display:flex;"></div>
+    </div>
+    <script src="browser.js"></script>
+  </body>
+</html>

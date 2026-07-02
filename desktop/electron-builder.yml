@@ -1,0 +1,57 @@
+# Cross-platform packaging for ClockWork Desktop.
+# Produces three distributables:
+#   Windows -> ClockWork-Setup-<version>.exe   (NSIS installer)
+#   macOS   -> ClockWork-<version>.dmg         (must be built on macOS/CI)
+#   Linux   -> ClockWork-<version>.AppImage + .deb
+appId: com.clockwork.desktop
+productName: ClockWork
+copyright: Copyright © ClockWork
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - src/**/*
+  - build/icon.png
+  - package.json
+  - "!**/*.map"
+
+# active-win ships platform helper binaries that must live outside the asar.
+asarUnpack:
+  - "**/node_modules/active-win/**"
+
+win:
+  target:
+    - nsis
+  icon: build/icon.png
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  artifactName: ClockWork-Setup-${version}.${ext}
+
+mac:
+  target:
+    - dmg
+  category: public.app-category.productivity
+  icon: build/icon.png
+  artifactName: ClockWork-${version}.${ext}
+  # desktopCapturer + active-win need Screen Recording permission on macOS.
+  extendInfo:
+    NSCameraUsageDescription: ClockWork captures periodic screenshots while you are clocked in.
+
+dmg:
+  artifactName: ClockWork-${version}.${ext}
+
+linux:
+  target:
+    - AppImage
+    - deb
+  category: Utility
+  icon: build/icon.png
+  artifactName: ClockWork-${version}.${ext}
+  maintainer: ClockWork

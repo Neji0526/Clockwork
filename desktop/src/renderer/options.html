@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>ClockWork settings</title>
+    <style>
+      body { font-family: -apple-system, system-ui, sans-serif; max-width: 520px; margin: 40px auto; padding: 0 20px; color: #1a1d23; }
+      h1 { font-size: 18px; } h2 { font-size: 14px; margin-top: 24px; }
+      label { display: block; font-size: 13px; margin: 12px 0 4px; color: #444; }
+      input[type=number] { width: 120px; padding: 7px; border: 1px solid #ccc; border-radius: 6px; }
+      input[type=url] { width: 100%; padding: 7px; border: 1px solid #ccc; border-radius: 6px; }
+      .muted { color: #777; font-size: 12px; line-height: 1.5; }
+      button { margin-top: 16px; padding: 8px 16px; border: 0; border-radius: 6px; background: #16a34a; color: #fff; font-weight: 600; cursor: pointer; }
+      .ok { color: #16a34a; font-size: 12px; margin-left: 10px; }
+    </style>
+  </head>
+  <body>
+    <h1>ClockWork settings</h1>
+
+    <h2>Dashboard URL</h2>
+    <p class="muted">Paste the URL of your ClockWork dashboard (e.g. <code>https://clockwork.yourcompany.com</code>). The "dashboard" link in the popup opens this address.</p>
+    <label>Dashboard URL</label>
+    <input id="dashboardUrl" type="url" placeholder="https://your-clockwork-site.com" />
+
+    <h2>Sampling</h2>
+    <p class="muted">These control how often ClockWork samples while you're clocked in. Defaults are fine for most people.</p>
+
+    <label>Idle after (seconds with no input)</label>
+    <input id="idleSeconds" type="number" min="15" max="3600" />
+
+    <label>Screenshot every (minutes)</label>
+    <input id="shotMinutes" type="number" min="1" max="60" />
+
+    <h2>What's captured</h2>
+    <p class="muted">
+      While clocked in: the active website and how long you're on it, idle stretches, a periodic screenshot of the active tab, and the steps you click (used to build SOPs from work you repeat). Nothing is captured when you're clocked out or on a break. You can see all of it on your dashboard — it's the same data your admin sees.
+    </p>
+
+    <button id="save">Save</button><span class="ok" id="ok"></span>
+    <script src="options.js"></script>
+  </body>
+</html>

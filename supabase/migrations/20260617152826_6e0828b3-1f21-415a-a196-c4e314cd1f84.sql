@@ -1,0 +1,1 @@
+DELETE FROM public.invoices WHERE number = 'TEST-ATOMICITY-001';

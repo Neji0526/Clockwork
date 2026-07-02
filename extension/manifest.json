@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "ClockWork",
+  "version": "0.4.13",
+  "description": "Transparent time and work tracker for virtual assistants. While clocked in: active site, time, idle, periodic screenshots, click-trails that auto-build SOPs. The VA sees exactly what the admin sees.",
+  "permissions": ["tabs", "storage", "alarms", "idle", "scripting", "unlimitedStorage"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js" },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_page": "options.html",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

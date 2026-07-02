@@ -1,0 +1,275 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  :root{
+    --bg:#0b0d12; --bg2:#11141b; --card:#161a23; --card2:#1c2230;
+    --line:#262c3a; --line2:#2f3647;
+    --txt:#eef1f6; --mut:#9aa3b6; --mut2:#6e7689;
+    --gold:#d4a84a; --gold-2:#e8c674; --teal:#37b8a3;
+    --green:#22c55e; --amber:#f59e0b; --red:#ef4444;
+    --shadow: 0 10px 30px -12px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    width:360px; font:14px/1.4 -apple-system,system-ui,"Segoe UI",sans-serif;
+    background: radial-gradient(120% 80% at 50% -10%, #1a1f2c 0%, var(--bg) 60%) var(--bg);
+    color:var(--txt); overflow:hidden;
+  }
+  .serif{ font-family: "Cormorant Garamond","Playfair Display", Georgia, serif; font-weight:600; letter-spacing:.3px; }
+  .wrap{ padding:16px 16px 12px; }
+  /* Header */
+  .hdr{ display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .mark{
+    width:32px;height:32px;border-radius:9px;
+    background: linear-gradient(135deg,var(--gold),var(--gold-2));
+    display:grid;place-items:center; color:#1a1408; font-weight:800;
+    box-shadow: 0 4px 14px -4px rgba(212,168,74,.5);
+    font-family:"Cormorant Garamond",Georgia,serif; font-size:18px;
+  }
+  .brand{ font-family:"Cormorant Garamond",Georgia,serif; font-size:20px; line-height:1; }
+  .brand small{ display:block; font:11px/1.2 -apple-system,system-ui,sans-serif; color:var(--mut); margin-top:3px; letter-spacing:.4px; }
+  .hdr .conn{ margin-left:auto; display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--mut); }
+  .conn .ck{ width:14px;height:14px;border-radius:50%; background:var(--green); display:inline-grid; place-items:center; color:#06210f; font-size:9px; font-weight:900; }
+
+  /* Cards */
+  .card{ background:linear-gradient(180deg,var(--card),var(--card2)); border:1px solid var(--line); border-radius:14px; padding:14px; box-shadow:var(--shadow); }
+  .card + .card{ margin-top:10px; }
+
+  /* Inputs */
+  label{ display:block; font-size:11px; color:var(--mut); margin:10px 0 5px; letter-spacing:.3px; text-transform:uppercase; }
+  input, select{ width:100%; padding:11px 12px; border-radius:10px; border:1px solid var(--line2); background:#0f131c; color:var(--txt); font-size:14px; outline:none; transition:border .15s, box-shadow .15s; }
+  input:focus, select:focus{ border-color:var(--gold); box-shadow:0 0 0 3px rgba(212,168,74,.18); }
+  .pw{ position:relative; }
+  .pw .toggle{ position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:0; color:var(--mut); font-size:11px; cursor:pointer; padding:6px 8px; border-radius:6px; width:auto; margin:0; font-weight:600; }
+  .pw .toggle:hover{ color:var(--gold); background:rgba(255,255,255,.04); }
+
+  /* Buttons */
+  button{ width:100%; padding:13px 14px; border-radius:11px; border:0; font:600 14px -apple-system,system-ui,sans-serif; cursor:pointer; transition: transform .08s ease, filter .15s, background .15s; display:inline-flex; align-items:center; justify-content:center; gap:8px; }
+  button:active{ transform: scale(.985); }
+  button:disabled{ opacity:.55; cursor:not-allowed; }
+  .primary{ background:linear-gradient(180deg,var(--gold-2),var(--gold)); color:#1a1408; box-shadow: 0 6px 18px -6px rgba(212,168,74,.55); }
+  .primary:hover{ filter:brightness(1.05); }
+  .stop{ background:#2a1418; color:#fecaca; border:1px solid rgba(239,68,68,.45); }
+  .stop:hover{ background:#3a1a20; }
+  .ghost{ background:transparent; color:var(--txt); border:1px solid var(--line2); }
+  .ghost:hover{ background:rgba(255,255,255,.04); border-color:var(--gold); }
+  .teal{ background:rgba(55,184,163,.14); color:#7ee0ce; border:1px solid rgba(55,184,163,.4); }
+  .teal:hover{ background:rgba(55,184,163,.22); }
+  .stack > * + *{ margin-top:8px; }
+
+  /* Timer */
+  .timer-wrap{ text-align:center; padding:6px 0 4px; }
+  .timer{ font-family:"Cormorant Garamond","Playfair Display",Georgia,serif; font-size:48px; font-weight:600; letter-spacing:1px; font-variant-numeric: tabular-nums; line-height:1; }
+  .timer.amber{ color:var(--amber); }
+  .rec-line{ display:inline-flex; align-items:center; gap:7px; font-size:11px; color:var(--mut); margin-top:8px; letter-spacing:.4px; text-transform:uppercase; }
+  .rec-dot{ width:8px;height:8px;border-radius:50%; background:var(--green); box-shadow:0 0 0 0 rgba(34,197,94,.7); animation: pulse 1.6s ease-out infinite; }
+  .rec-dot.amber{ background:var(--amber); animation:none; }
+  @keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(34,197,94,.6)} 70%{box-shadow:0 0 0 10px rgba(34,197,94,0)} 100%{box-shadow:0 0 0 0 rgba(34,197,94,0)} }
+
+  .ctx{ display:flex; align-items:center; gap:10px; margin-top:12px; padding:10px 12px; background:rgba(255,255,255,.03); border:1px solid var(--line); border-radius:10px; }
+  .ctx .ic{ width:8px;height:8px;border-radius:50%; background:var(--teal); flex-shrink:0; }
+  .ctx .txt{ font-size:12px; color:var(--txt); min-width:0; flex:1; }
+  .ctx .txt b{ font-weight:600; color:#fff; }
+  .ctx .txt .sub{ display:block; font-size:11px; color:var(--mut); margin-top:1px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  .sync{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:10px; font-size:11px; color:var(--mut2); }
+  .pills{ display:inline-flex; gap:5px; }
+  .pill{ font-size:10px; padding:3px 8px; border-radius:999px; border:1px solid var(--line2); color:var(--mut); font-weight:600; letter-spacing:.3px; }
+  .pill.green{ background:rgba(34,197,94,.13); color:#7ee8a4; border-color:rgba(34,197,94,.4); }
+  .pill.amber{ background:rgba(245,158,11,.13); color:#fcd99a; border-color:rgba(245,158,11,.4); }
+  .pill.red{ background:rgba(239,68,68,.13); color:#fda4a4; border-color:rgba(239,68,68,.4); }
+
+  /* Banner */
+  .banner{ padding:11px 12px; border-radius:11px; font-size:13px; margin-bottom:10px; display:flex; gap:10px; align-items:flex-start; }
+  .banner.err{ background:rgba(239,68,68,.12); color:#fecaca; border:1px solid rgba(239,68,68,.4); }
+  .banner.warn{ background:rgba(245,158,11,.12); color:#fde2b3; border:1px solid rgba(245,158,11,.4); }
+  .banner.ok{ background:rgba(34,197,94,.1); color:#bff0cf; border:1px solid rgba(34,197,94,.35); }
+  .banner b{ display:block; font-size:13px; margin-bottom:2px; color:#fff; }
+  .banner .ic{ font-size:16px; line-height:1; }
+
+  .err-msg{ color:#fca5a5; font-size:12px; margin-top:8px; min-height:16px; }
+
+  /* Break banner */
+  .break-banner{ background: linear-gradient(180deg, rgba(245,158,11,.18), rgba(245,158,11,.08)); border:1px solid rgba(245,158,11,.45); padding:14px; border-radius:12px; text-align:center; }
+  .break-banner .lbl{ font-size:11px; color:var(--amber); letter-spacing:.5px; text-transform:uppercase; font-weight:700; }
+  .break-banner .t{ font-family:"Cormorant Garamond",Georgia,serif; font-size:36px; font-variant-numeric:tabular-nums; color:#ffd98a; margin-top:4px; }
+
+  /* Footer */
+  footer{ display:flex; align-items:center; gap:6px; padding:10px 16px 12px; border-top:1px solid var(--line); margin-top:6px; color:var(--mut); font-size:11px; background:rgba(0,0,0,.15); }
+  footer a{ color:var(--mut); text-decoration:none; padding:5px 8px; border-radius:6px; cursor:pointer; }
+  footer a:hover{ color:var(--gold); background:rgba(255,255,255,.04); }
+  footer .sp{ margin-left:auto; }
+
+  .hidden{ display:none !important; }
+
+  /* Transitions */
+  .fade{ animation: fade .25s ease-out; }
+  @keyframes fade{ from{opacity:0; transform: translateY(4px);} to{opacity:1; transform:none;} }
+
+  .who{ font-size:13px; color:var(--txt); font-weight:600; max-width:170px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .small-note{ font-size:11px; color:var(--mut); margin-top:10px; line-height:1.5; text-align:center; }
+  .small-note a{ color:var(--teal); text-decoration:none; }
+  .small-note a:hover{ text-decoration:underline; }
+
+  .toast{ position:absolute; left:50%; top:14px; transform:translateX(-50%); background:rgba(34,197,94,.95); color:#062812; padding:8px 14px; border-radius:999px; font-size:12px; font-weight:700; box-shadow:var(--shadow); animation: pop .3s ease-out; z-index:50; }
+  @keyframes pop{ from{opacity:0; transform:translate(-50%,-8px);} to{opacity:1; transform:translate(-50%,0);} }
+</style>
+</head>
+<body>
+<div id="toast" class="toast hidden">Saved</div>
+
+<!-- ============ SIGNED OUT ============ -->
+<div id="view-signin" class="hidden fade">
+  <div class="wrap">
+    <div class="hdr">
+      <div class="mark">C</div>
+      <div class="brand">ClockWork<small>Sign in to start tracking</small></div>
+    </div>
+    <div class="card">
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="username" placeholder="you@example.com" />
+      <label for="password">Password</label>
+      <div class="pw">
+        <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" />
+        <button type="button" class="toggle" id="togglePw">Show</button>
+      </div>
+      <div class="stack" style="margin-top:14px;">
+        <button class="primary" id="loginBtn">Sign in</button>
+      </div>
+      <div class="err-msg" id="loginErr"></div>
+    </div>
+    <div class="small-note">By signing in you agree to be tracked while clocked in. Your admin sees what you see.</div>
+  </div>
+  <footer>
+    <span id="verSignin"></span>
+  </footer>
+</div>
+
+<!-- ============ REAUTH NEEDED ============ -->
+<div id="view-reauth" class="hidden fade">
+  <div class="wrap">
+    <div class="hdr">
+      <div class="mark">C</div>
+      <div class="brand">ClockWork<small>Action needed</small></div>
+    </div>
+    <div class="banner err">
+      <span class="ic">⚠</span>
+      <div>
+        <b>Your session expired</b>
+        Sign in again to keep your time accurate. Anything recorded in the meantime is safely queued.
+      </div>
+    </div>
+    <button class="primary" id="reauthBtn">Sign in again</button>
+  </div>
+  <footer>
+    <a id="footLogout2">Sign out</a>
+    <span class="sp"></span>
+    <span id="verReauth"></span>
+  </footer>
+</div>
+
+<!-- ============ CLOCKED OUT (CONNECTED) ============ -->
+<div id="view-out" class="hidden fade">
+  <div class="wrap">
+    <div class="hdr">
+      <div class="mark">C</div>
+      <div class="brand">ClockWork<small>Ready to clock in</small></div>
+      <div class="conn"><span class="ck">✓</span>Connected</div>
+    </div>
+
+    <div id="welcome" class="banner ok hidden">
+      <span class="ic">✨</span>
+      <div><b>You're all set</b>Pick a client below and press Clock In to start tracking.</div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <div>
+          <div class="who" id="whoOut">—</div>
+          <div style="font-size:11px; color:var(--mut); margin-top:2px;">Signed in</div>
+        </div>
+      </div>
+      <label for="client">Client / project</label>
+      <select id="client"></select>
+      <div class="stack" style="margin-top:14px;">
+        <button class="primary" id="clockInBtn">▶  Clock In</button>
+      </div>
+      <div class="sync">
+        <span id="syncOut">Ready</span>
+        <span class="pills" id="pillsOut"></span>
+      </div>
+    </div>
+
+    <div class="small-note">
+      While clocked in, ClockWork records your active site, time, idle stretches, periodic screenshots, and click steps.
+    </div>
+  </div>
+  <footer id="footOut"></footer>
+</div>
+
+<!-- ============ RECORDING ============ -->
+<div id="view-rec" class="hidden fade">
+  <div class="wrap">
+    <div class="hdr">
+      <div class="mark">C</div>
+      <div class="brand">ClockWork<small id="whoRec">Recording</small></div>
+      <div class="conn"><span class="ck">✓</span>Live</div>
+    </div>
+    <div class="card">
+      <div class="timer-wrap">
+        <div class="timer serif" id="timerRec">00:00:00</div>
+        <div class="rec-line"><span class="rec-dot"></span> Recording</div>
+      </div>
+      <div class="ctx">
+        <span class="ic"></span>
+        <div class="txt">
+          <b id="clientRec">No client</b>
+          <span class="sub" id="appRec">Waiting for activity…</span>
+        </div>
+      </div>
+      <div class="sync">
+        <span id="syncRec">Synced just now</span>
+        <span class="pills" id="pillsRec"></span>
+      </div>
+    </div>
+    <div class="stack" style="margin-top:10px;">
+      <button class="teal" id="pauseBtn">⏸  Short break</button>
+      <button class="teal" id="lunchBtn">🍽  Lunch</button>
+      <button class="stop" id="clockOutBtn">■  Clock Out</button>
+      <button class="ghost hidden" id="retryBtn">Retry sync now</button>
+    </div>
+  </div>
+  <footer id="footRec"></footer>
+</div>
+
+<!-- ============ ON BREAK ============ -->
+<div id="view-break" class="hidden fade">
+  <div class="wrap">
+    <div class="hdr">
+      <div class="mark">C</div>
+      <div class="brand">ClockWork<small>Paused</small></div>
+      <div class="conn"><span class="ck" style="background:var(--amber); color:#3a2400;">⏸</span>On break</div>
+    </div>
+    <div class="break-banner">
+      <div class="lbl">On break</div>
+      <div class="t serif" id="breakTimer">00:00</div>
+      <div style="font-size:11px; color:var(--mut); margin-top:6px;">Tracking is paused. Resume when you're back.</div>
+    </div>
+    <div class="stack" style="margin-top:12px;">
+      <button class="primary" id="resumeBtn">▶  Resume work</button>
+      <button class="stop" id="clockOutBtn2">■  Clock Out</button>
+    </div>
+    <div class="sync" style="margin-top:12px;">
+      <span id="syncBreak">Paused</span>
+      <span class="pills" id="pillsBreak"></span>
+    </div>
+  </div>
+  <footer id="footBreak"></footer>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
