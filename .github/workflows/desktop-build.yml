@@ -35,9 +35,12 @@ jobs:
         run: npm install
 
       - name: Build distributable
-        run: npm run build
+        # NOTE: do NOT pass a GitHub token here. electron-builder auto-publishes
+        # on CI when a token + tag are present, and with no publish config that
+        # step fails. We publish separately in the `release` job below, so force
+        # publishing off here.
+        run: npm run build -- --publish never
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # We don't ship Apple/Windows code-signing certs — don't try to sign.
           CSC_IDENTITY_AUTO_DISCOVERY: false
 
