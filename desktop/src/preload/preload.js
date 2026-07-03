@@ -1,9 +1,11 @@
-// Preload for the popup + options windows — the secure bridge.
+// Preload for the popup + options windows — the secure context bridge.
 //
-// It re-implements the small slice of the `chrome.*` API that popup.js and
-// options.js use, backed by ipcRenderer. This lets those two files remain
-// byte-for-byte the extension's originals (preserving the UI and flows exactly)
-// while the calls are serviced by the Electron main process.
+// Exposes a minimal, namespaced `window.clockwork` API (same shape the renderer
+// expects) backed by ipcRenderer. It is deliberately NOT named `chrome`:
+// Chromium pre-defines a read-only `window.chrome`, and contextBridge refuses to
+// bind on top of it ("Cannot bind an API on top of an existing property").
+// Namespacing keeps contextIsolation:true + nodeIntegration:false intact
+// (Electron security best practice) while the renderer talks to the main process.
 
 const { contextBridge, ipcRenderer } = require("electron");
 
@@ -13,7 +15,7 @@ function argValue(flag) {
 }
 const APP_VERSION = argValue("--clockwork-version") || "1.0.0";
 
-const chromeShim = {
+const api = {
   runtime: {
     id: "clockwork-desktop",
     lastError: null,
@@ -43,11 +45,9 @@ const chromeShim = {
   },
 };
 
-contextBridge.exposeInMainWorld("chrome", chromeShim);
+// Desktop-only conveniences the renderer may use.
+api.openBrowser = () => ipcRenderer.invoke("open-browser");
+api.openDashboard = () => ipcRenderer.invoke("open-dashboard");
+api.version = APP_VERSION;
 
-// A couple of desktop-only conveniences the renderer may use.
-contextBridge.exposeInMainWorld("clockworkDesktop", {
-  openBrowser: () => ipcRenderer.invoke("open-browser"),
-  openDashboard: () => ipcRenderer.invoke("open-dashboard"),
-  version: APP_VERSION,
-});
+contextBridge.exposeInMainWorld("clockwork", api);

@@ -2,7 +2,7 @@ const $ = (id) => document.getElementById(id);
 const DEFAULTS = { idleSeconds: 300, shotMinutes: 5, dashboardUrl: "" };
 
 async function load() {
-  const { settings } = await chrome.storage.local.get("settings");
+  const { settings } = await clockwork.storage.local.get("settings");
   const s = { ...DEFAULTS, ...(settings || {}) };
   $("idleSeconds").value = s.idleSeconds;
   $("shotMinutes").value = s.shotMinutes;
@@ -10,7 +10,7 @@ async function load() {
 }
 
 $("save").onclick = async () => {
-  const { settings } = await chrome.storage.local.get("settings");
+  const { settings } = await clockwork.storage.local.get("settings");
   const raw = ($("dashboardUrl").value || "").trim().replace(/\/+$/, "");
   let dashboardUrl = "";
   if (raw) {
@@ -22,7 +22,7 @@ $("save").onclick = async () => {
     shotMinutes: Math.min(60, Math.max(1, Number($("shotMinutes").value) || 5)),
     dashboardUrl,
   };
-  await chrome.storage.local.set({ settings: next });
+  await clockwork.storage.local.set({ settings: next });
   $("ok").textContent = raw && !dashboardUrl ? "Saved — but dashboard URL was invalid." : "Saved.";
 };
 

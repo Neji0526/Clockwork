@@ -15,7 +15,7 @@ function show(id) {
 }
 
 function send(type, extra) {
-  return new Promise((resolve) => chrome.runtime.sendMessage({ type, ...(extra || {}) }, resolve));
+  return new Promise((resolve) => clockwork.runtime.sendMessage({ type, ...(extra || {}) }, resolve));
 }
 
 function fmtHMS(sec) {
@@ -75,7 +75,7 @@ function renderUpdateBanner(viewId) {
   `;
   const link = div.querySelector(".upd-link");
   link.onclick = () => {
-    if (installUrl) chrome.tabs.create({ url: installUrl });
+    if (installUrl) clockwork.tabs.create({ url: installUrl });
     else toast("Set the dashboard URL in Settings");
   };
   // Insert at top of wrap, after header if present.
@@ -134,12 +134,12 @@ function buildFooter(elId, includeLogout = true) {
 async function onFootAct(e) {
   const act = e.currentTarget.getAttribute("data-act");
   if (act === "dash") {
-    const { settings } = await chrome.storage.local.get("settings");
+    const { settings } = await clockwork.storage.local.get("settings");
     const url = (settings && settings.dashboardUrl) || "";
-    if (url) chrome.tabs.create({ url });
+    if (url) clockwork.tabs.create({ url });
     else toast("Set the dashboard URL in Settings");
   } else if (act === "settings") {
-    if (chrome.runtime.openOptionsPage) chrome.runtime.openOptionsPage();
+    if (clockwork.runtime.openOptionsPage) clockwork.runtime.openOptionsPage();
   } else if (act === "logout") {
     st = await send("wt-logout");
     await refresh();
@@ -155,7 +155,7 @@ async function loadClients(selectedId) {
   if (!sel) return;
   sel.innerHTML = '<option value="">— No client —</option>' +
     clientsCache.map(c => `<option value="${c.id}">${(c.name || "").replace(/</g, "&lt;")}</option>`).join("");
-  const { wtLastClient } = await chrome.storage.local.get("wtLastClient");
+  const { wtLastClient } = await clockwork.storage.local.get("wtLastClient");
   const want = selectedId || wtLastClient;
   if (want) sel.value = want;
 }
@@ -221,10 +221,10 @@ async function render() {
   renderUpdateBanner("view-out");
 
   // First-run welcome after install + sign-in
-  const { wtSawWelcome } = await chrome.storage.local.get("wtSawWelcome");
+  const { wtSawWelcome } = await clockwork.storage.local.get("wtSawWelcome");
   if (!wtSawWelcome) {
     $("welcome").classList.remove("hidden");
-    chrome.storage.local.set({ wtSawWelcome: true });
+    clockwork.storage.local.set({ wtSawWelcome: true });
   } else {
     $("welcome").classList.add("hidden");
   }
@@ -254,7 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
     $("loginBtn").disabled = false; $("loginBtn").textContent = "Sign in";
     if (r && r.ok) {
       // Reset welcome flag on fresh sign-in so users get the affirmation
-      await chrome.storage.local.remove("wtSawWelcome");
+      await clockwork.storage.local.remove("wtSawWelcome");
       toast("Signed in ✓");
       await refresh();
     } else {
@@ -274,7 +274,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("clockInBtn").onclick = async () => {
     const sel = $("client");
     const clientId = sel ? sel.value : "";
-    await chrome.storage.local.set({ wtLastClient: clientId });
+    await clockwork.storage.local.set({ wtLastClient: clientId });
     $("clockInBtn").disabled = true; $("clockInBtn").textContent = "Starting…";
     const r = await send("wt-clock-in", { clientId: clientId || null });
     $("clockInBtn").disabled = false; $("clockInBtn").innerHTML = "▶  Clock In";
