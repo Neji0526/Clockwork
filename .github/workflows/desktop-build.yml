@@ -19,7 +19,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        # ubuntu-22.04 (not ubuntu-latest/24.04): electron-builder's AppImage
+        # tooling reliably fails on 24.04. 22.04 is the known-good runner.
+        os: [windows-latest, macos-latest, ubuntu-22.04]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -30,6 +32,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Install Linux packaging deps
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libarchive-tools fakeroot
 
       - name: Install dependencies
         run: npm install

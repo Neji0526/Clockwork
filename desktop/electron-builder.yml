@@ -48,11 +48,13 @@ dmg:
   artifactName: ClockWork-${version}.${ext}
 
 linux:
+  # AppImage only — the portable, runnable Linux file. The .deb target needs
+  # extra dpkg/fpm tooling and strict metadata and is the usual cause of Linux
+  # CI failures; the AppImage is what users actually run.
   target:
     - AppImage
-    - deb
   category: Utility
   icon: build/icon.png
   artifactName: ClockWork-${version}.${ext}
-  # electron-builder's .deb target requires a maintainer WITH an email.
   maintainer: ClockWork <support@clockwork.app>
+  synopsis: Transparent time and work tracker for virtual assistants.
