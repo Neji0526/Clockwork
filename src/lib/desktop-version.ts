@@ -1,7 +1,7 @@
 // Single source of truth for the current ClockWork Desktop (Electron) release.
 // Bump these when shipping new installers to public/downloads/.
 // Keep in sync with desktop/package.json "version".
-export const DESKTOP_VERSION = "1.0.0";
+export const DESKTOP_VERSION = "1.0.1";
 // Below this, the desktop app shows a HARD "you must update" block.
 export const MIN_DESKTOP_VERSION = "1.0.0";
 
