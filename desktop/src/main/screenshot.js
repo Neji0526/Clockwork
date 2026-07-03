@@ -33,19 +33,32 @@ async function captureWebContents(id, quality) {
   return captureFrom(wc, quality);
 }
 
-// Capture the primary display at full resolution.
+// Capture the primary display. Robust against empty thumbnails: tries full
+// resolution first, then falls back to a capped size (some GPU/driver combos
+// return an empty image for very large thumbnailSize requests).
 async function captureScreen(quality) {
   const display = screen.getPrimaryDisplay();
   const { width, height } = display.size;
   const sf = display.scaleFactor || 1;
-  const sources = await desktopCapturer.getSources({
-    types: ["screen"],
-    thumbnailSize: { width: Math.round(width * sf), height: Math.round(height * sf) },
-  });
-  if (!sources.length) return null;
-  const img = sources[0].thumbnail;
-  if (!img || img.isEmpty()) return null;
-  return toJpegDataUrl(img, quality);
+
+  const sizes = [
+    { width: Math.round(width * sf), height: Math.round(height * sf) },
+    { width: Math.round(width), height: Math.round(height) }, // fallback: no scale
+    { width: 1920, height: 1080 }, // last-resort cap
+  ];
+
+  for (const thumbnailSize of sizes) {
+    let sources;
+    try {
+      sources = await desktopCapturer.getSources({ types: ["screen"], thumbnailSize });
+    } catch (e) {
+      continue;
+    }
+    // Prefer the first source whose thumbnail is non-empty.
+    const src = (sources || []).find((s) => s.thumbnail && !s.thumbnail.isEmpty());
+    if (src) return toJpegDataUrl(src.thumbnail, quality);
+  }
+  return null;
 }
 
 module.exports = { captureFrom, captureWebContents, captureScreen };

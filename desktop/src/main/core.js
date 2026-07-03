@@ -747,6 +747,15 @@ async function getLastShotAt() {
 async function setLastShotAt(ts) {
   await P.store.set({ [C.LAST_SHOT_KEY]: ts });
 }
+// Last screenshot outcome, surfaced in the popup so the VA can see capture is
+// working (or why it isn't).
+async function setLastShotResult(ok, reason) {
+  await P.store.set({ "wt-last-shot-result": { ok: !!ok, reason: reason || null, at: Date.now() } });
+}
+async function getLastShotResult() {
+  const o = await P.store.get("wt-last-shot-result");
+  return o["wt-last-shot-result"] || null;
+}
 
 async function takeScreenshot(opts) {
   const trigger = (opts && opts.trigger) || "alarm";
@@ -758,32 +767,26 @@ async function takeScreenshot(opts) {
   const target = P.tracker.getCaptureTarget();
   const s = await getSettings();
   let dataUrl = null;
-  if (target.kind === "web") {
-    if (!/^https?:\/\//i.test(target.url || "")) {
-      warnOnce("shot_skip_no_capturable_tab", trigger, target.url);
-      return { ok: false, reason: "no_capturable_tab" };
-    }
-    if (isBlocked(target.url, s.blocklist)) {
-      warnOnce("shot_skip_blocked_url", trigger, hostOf(target.url));
-      return { ok: false, reason: "blocked_url" };
-    }
+  if (target.kind === "web" && !isBlocked(target.url, s.blocklist)) {
+    // Try the focused in-app browser tab first.
     try {
       dataUrl = await P.screenshot.captureWebContents(target.webContentsId, 55);
     } catch (e) {
-      warnOnce("shot_skip_capture_throttled", trigger, e && e.message);
-      return { ok: false, reason: "capture_throttled" };
+      warnOnce("shot_web_capture_err", trigger, e && e.message);
     }
-  } else {
-    // Native full-screen capture of whatever app the VA is working in.
+  }
+  // Default / fallback: capture the whole screen (the reliable path). This also
+  // covers the case where the in-app web tab couldn't be captured.
+  if (!dataUrl) {
     try {
       dataUrl = await P.screenshot.captureScreen(55);
     } catch (e) {
-      warnOnce("shot_skip_capture_throttled", trigger, e && e.message);
-      return { ok: false, reason: "capture_throttled" };
+      warnOnce("shot_screen_capture_err", trigger, e && e.message);
     }
   }
   if (!dataUrl) {
     warnOnce("shot_skip_capture_failed", trigger);
+    await setLastShotResult(false, "capture_failed");
     return { ok: false, reason: "capture_failed" };
   }
   try {
@@ -792,9 +795,11 @@ async function takeScreenshot(opts) {
     const r = await ingest(payload);
     if (r.ok || r.queued) await setLastShotAt(Date.now());
     if (!r.ok && !r.queued) warnOnce("shot_skip_upload_failed", trigger, r.status);
+    await setLastShotResult(!!(r.ok || r.queued), r.ok ? "ok" : r.queued ? "queued" : "upload_failed" + (r.status ? ":" + r.status : ""));
     return { ok: !!r.ok, reason: r.ok ? null : r.queued ? "queued" : "upload_failed" };
   } catch (e) {
     warnOnce("shot_skip_ingest_exception", trigger, e && e.message);
+    await setLastShotResult(false, "ingest_failed");
     return { ok: false, reason: "ingest_failed" };
   }
 }
@@ -1132,6 +1137,8 @@ async function status() {
   const mustUpdate = !!(vinfo && cmpVer(installed, vinfo.min) < 0);
   let elapsed = 0;
   if (rec && rec.startedAt) elapsed = Math.round((Date.now() - rec.startedAt) / 1000);
+  const lastShotAt = await getLastShotAt();
+  const lastShot = await getLastShotResult();
   return {
     loggedIn: !!auth,
     email: auth ? auth.email : null,
@@ -1146,6 +1153,8 @@ async function status() {
     elapsedSec: elapsed,
     queued,
     lastSyncAt,
+    lastShotAt: lastShotAt || null,
+    lastShot: lastShot || null,
     online: P.isOnline(),
     version: installed,
     updateAvailable,
@@ -1153,6 +1162,40 @@ async function status() {
     latestVersion: vinfo ? vinfo.latest : null,
     installUrl: vinfo ? vinfo.install_url : null,
   };
+}
+
+// Manual capture test — proves screen capture works on this machine, and (if
+// clocked in) uploads the shot so it appears on the dashboard.
+async function testShot() {
+  let dataUrl = null;
+  try {
+    dataUrl = await P.screenshot.captureScreen(55);
+  } catch (e) {
+    await setLastShotResult(false, "capture_error");
+    return { ok: false, reason: "Capture error: " + (e && e.message) };
+  }
+  if (!dataUrl) {
+    await setLastShotResult(false, "capture_empty");
+    return { ok: false, reason: "Capture returned empty (screen recording blocked?)" };
+  }
+  const kb = Math.round(dataUrl.length / 1024);
+  const rec = await getRec();
+  if (rec && !rec.paused) {
+    const r = await ingest({ kind: "screenshot", session_id: rec.sessionId, data_url: dataUrl });
+    if (r.ok) {
+      await setLastShotAt(Date.now());
+      await setLastShotResult(true, "ok");
+      return { ok: true, reason: `Captured ${kb}KB and uploaded ✓` };
+    }
+    if (r.queued) {
+      await setLastShotResult(true, "queued");
+      return { ok: true, reason: `Captured ${kb}KB, queued (offline) — will upload` };
+    }
+    await setLastShotResult(false, "upload_failed");
+    return { ok: false, reason: `Captured ${kb}KB but upload failed (${r.status || r.error || "?"})` };
+  }
+  await setLastShotResult(true, "capture_only");
+  return { ok: true, reason: `Capture works (${kb}KB). Clock in to upload screenshots.` };
 }
 
 // ---------- message router ----------
@@ -1180,6 +1223,8 @@ async function handleMessage(msg, sender) {
       return await clockOut();
     case "wt-toggle-pause":
       return await togglePause(msg.breakType);
+    case "wt-test-shot":
+      return await testShot();
     case "wt-flush-now":
       await flushQueue();
       return await status();

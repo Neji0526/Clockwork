@@ -82,10 +82,18 @@ async function getActiveTarget() {
   }
 }
 
-// Lenient capture target for screenshots: prefer the embedded active web tab,
-// otherwise signal a full-screen capture. Mirrors captureVisibleTab/lastNormalWindow.
+// Capture target for screenshots. Only prefer the embedded web tab when the
+// in-app browser is actually the focused window; otherwise ALWAYS capture the
+// full screen (the reliable, default path). This prevents a backgrounded/stale
+// in-app browser tab from hijacking — and breaking — every screenshot.
 function getCaptureTarget() {
-  if (embedded && embedded.url && /^https?:\/\//i.test(embedded.url)) {
+  if (
+    browserFocused &&
+    embedded &&
+    embedded.url &&
+    /^https?:\/\//i.test(embedded.url) &&
+    embedded.webContentsId != null
+  ) {
     return { kind: "web", url: embedded.url, webContentsId: embedded.webContentsId };
   }
   return { kind: "screen" };

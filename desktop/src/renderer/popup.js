@@ -166,6 +166,18 @@ function clientNameFor(id) {
   return c ? c.name : "Client";
 }
 
+function shotStatusText(st) {
+  const res = st && st.lastShot;
+  const at = st && st.lastShotAt;
+  if (res && res.ok === false) return "⚠ Screenshot failed: " + (res.reason || "error");
+  if (at) {
+    const s = Math.max(0, Math.round((Date.now() - at) / 1000));
+    const ago = s < 60 ? s + "s ago" : s < 3600 ? Math.floor(s / 60) + "m ago" : Math.floor(s / 3600) + "h ago";
+    return "📷 Last screenshot " + ago;
+  }
+  return st && st.clockedIn ? "📷 Waiting for first screenshot…" : "📷 No screenshots yet — clock in to start";
+}
+
 async function render() {
   if (!st) return;
 
@@ -195,6 +207,7 @@ async function render() {
     $("appRec").textContent = st.currentApp ? "on " + st.currentApp : "Waiting for activity…";
     $("syncRec").textContent = fmtAgo(st.lastSyncAt);
     $("pillsRec").innerHTML = pillsHTML(st);
+    if ($("shotRec")) $("shotRec").textContent = shotStatusText(st);
     $("retryBtn").classList.toggle("hidden", !(st.queued > 0));
     buildFooter("footRec");
     renderUpdateBanner("view-rec");
@@ -218,6 +231,7 @@ async function render() {
   $("pillsOut").innerHTML = pillsHTML(st);
   buildFooter("footOut");
   $("syncOut").textContent = st.lastSyncAt ? fmtAgo(st.lastSyncAt) : "Ready";
+  if ($("shotOut")) $("shotOut").textContent = shotStatusText(st);
   renderUpdateBanner("view-out");
 
   // First-run welcome after install + sign-in
@@ -333,6 +347,18 @@ document.addEventListener("DOMContentLoaded", () => {
     $("retryBtn").disabled = true; $("retryBtn").textContent = "Syncing…";
     await send("wt-flush-now");
     $("retryBtn").disabled = false; $("retryBtn").textContent = "Retry sync now";
+    await refresh();
+  };
+
+  $("testShotBtn").onclick = async () => {
+    const btn = $("testShotBtn");
+    btn.disabled = true;
+    const old = btn.innerHTML;
+    btn.textContent = "📷  Capturing…";
+    const r = await send("wt-test-shot");
+    btn.disabled = false;
+    btn.innerHTML = old;
+    toast(r && r.reason ? r.reason : r && r.ok ? "Captured ✓" : "Capture failed");
     await refresh();
   };
 

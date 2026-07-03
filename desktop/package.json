@@ -1,7 +1,7 @@
 {
   "name": "clockwork-desktop",
   "productName": "ClockWork",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "ClockWork — transparent time and work tracker for virtual assistants. Cross-platform desktop app (migrated from the Chrome extension).",
   "author": {
     "name": "ClockWork",
