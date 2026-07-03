@@ -154,6 +154,16 @@ function wireIpc() {
 
   // In-app browser -> main: which web tab is active (for activity + capture).
   ipcMain.on("cw-embedded-active", (_e, info) => tracker.setEmbeddedActive(info));
+
+  // Renderer -> main: fit the window height to the rendered content so there is
+  // no empty space below the card/footer. Width is preserved.
+  ipcMain.on("resize-window", (e, height) => {
+    const win = BrowserWindow.fromWebContents(e.sender);
+    if (!win || win.isDestroyed()) return;
+    const [w] = win.getContentSize();
+    const h = Math.max(160, Math.min(1000, Math.round(Number(height) || 0)));
+    if (h) win.setContentSize(w, h);
+  });
 }
 
 // ---------- boot ----------

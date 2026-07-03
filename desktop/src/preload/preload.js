@@ -49,5 +49,7 @@ const api = {
 api.openBrowser = () => ipcRenderer.invoke("open-browser");
 api.openDashboard = () => ipcRenderer.invoke("open-dashboard");
 api.version = APP_VERSION;
+// Ask main to size the window to the rendered content height (no dead space).
+api.resizeWindow = (height) => ipcRenderer.send("resize-window", height);
 
 contextBridge.exposeInMainWorld("clockwork", api);

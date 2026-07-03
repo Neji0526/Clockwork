@@ -230,9 +230,25 @@ async function render() {
   }
 }
 
+// Measure the currently-visible view and ask main to size the window to it,
+// so there is no empty dark space below the card/footer.
+let _lastFitH = 0;
+function fitWindow() {
+  requestAnimationFrame(() => {
+    const view = VIEWS.map((v) => $(v)).find((el) => el && !el.classList.contains("hidden"));
+    const el = view || document.body;
+    const h = Math.ceil(el.getBoundingClientRect().height);
+    if (h && h !== _lastFitH && window.clockwork && window.clockwork.resizeWindow) {
+      _lastFitH = h;
+      window.clockwork.resizeWindow(h);
+    }
+  });
+}
+
 async function refresh() {
   st = await send("wt-status");
   await render();
+  fitWindow();
 }
 
 // ============ Event wiring ============
@@ -322,7 +338,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   refresh();
   // Force a version-check on every popup open so VAs see fresh status.
-  send("wt-check-update").then((s) => { if (s) { st = s; render(); } });
+  send("wt-check-update").then((s) => { if (s) { st = s; render().then(fitWindow); } });
+  // Re-fit whenever the visible content changes size (banners, pills, etc.).
+  window.addEventListener("load", fitWindow);
+  new ResizeObserver(fitWindow).observe(document.body);
   startTicker();
   setInterval(refresh, 5000);
 });
